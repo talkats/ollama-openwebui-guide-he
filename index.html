@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>טל תלמד אותי על AI, מדריך Ollama + Open WebUI</title>
+<style>
+  :root {
+    --bg: #faf8f4;
+    --surface: #ffffff;
+    --text: #1a1a1a;
+    --text-muted: #5f5e5a;
+    --text-light: #888780;
+    --accent: #3C3489;
+    --accent-light: #EEEDFE;
+    --accent-soft: #CECBF6;
+    --teal: #0F6E56;
+    --teal-light: #E1F5EE;
+    --coral: #993C1D;
+    --coral-light: #FAECE7;
+    --amber: #854F0B;
+    --amber-light: #FAEEDA;
+    --border: rgba(0,0,0,0.08);
+    --border-strong: rgba(0,0,0,0.15);
+    --code-bg: #2c2c2a;
+    --code-text: #f1efe8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 16px;
+    padding: 0;
+  }
+
+  .container {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  /* Header */
+  .hero {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    margin-bottom: 2rem;
+    border: 0.5px solid var(--border);
+    text-align: center;
+  }
+
+  .hero-tag {
+    display: inline-block;
+    background: var(--accent-light);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 1rem;
+    letter-spacing: 0.5px;
+  }
+
+  .hero h1 {
+    font-size: 28px;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+  }
+
+  .hero p {
+    font-size: 15px;
+    color: var(--text-muted);
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .signature {
+    margin-top: 1.5rem;
+    font-size: 13px;
+    color: var(--text-light);
+  }
+
+  /* Section */
+  section {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 1.75rem 1.5rem;
+    margin-bottom: 1.25rem;
+    border: 0.5px solid var(--border);
+  }
+
+  h2 {
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  h3 {
+    font-size: 16px;
+    font-weight: 500;
+    margin: 1.25rem 0 0.5rem;
+    color: var(--text);
+  }
+
+  p {
+    margin-bottom: 0.75rem;
+    color: var(--text);
+  }
+
+  .muted {
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  /* Code blocks */
+  .code {
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 14px;
+    direction: ltr;
+    text-align: left;
+    overflow-x: auto;
+    margin: 0.75rem 0;
+    position: relative;
+  }
+
+  .code::before {
+    content: 'Terminal';
+    position: absolute;
+    top: 4px;
+    left: 12px;
+    font-size: 10px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 1px;
+  }
+
+  .code-content {
+    padding-top: 12px;
+  }
+
+  /* Callouts */
+  .callout {
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 1rem 0;
+    border-right: 3px solid;
+    font-size: 14px;
+  }
+
+  .callout-info {
+    background: var(--accent-light);
+    border-color: var(--accent);
+    color: #26215C;
+  }
+
+  .callout-warn {
+    background: var(--amber-light);
+    border-color: #BA7517;
+    color: #633806;
+  }
+
+  .callout-tip {
+    background: var(--teal-light);
+    border-color: var(--teal);
+    color: #04342C;
+  }
+
+  .callout strong {
+    font-weight: 500;
+  }
+
+  /* Lists */
+  ul, ol {
+    margin: 0.5rem 0 0.75rem;
+    padding-right: 1.5rem;
+  }
+
+  li {
+    margin-bottom: 0.4rem;
+  }
+
+  /* Comparison cards */
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 1rem 0;
+  }
+
+  .compare-card {
+    padding: 1rem;
+    border-radius: 8px;
+    border: 0.5px solid var(--border);
+  }
+
+  .compare-card.cloud {
+    background: var(--coral-light);
+  }
+
+  .compare-card.local {
+    background: var(--teal-light);
+  }
+
+  .compare-card h4 {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .compare-card.cloud h4 { color: var(--coral); }
+  .compare-card.local h4 { color: var(--teal); }
+
+  .compare-card ul {
+    padding-right: 1rem;
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .compare-card li {
+    margin-bottom: 4px;
+  }
+
+  /* Requirements */
+  .req-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin: 1rem 0;
+  }
+
+  .req-card {
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    border: 0.5px solid var(--border);
+  }
+
+  .req-label {
+    font-size: 11px;
+    color: var(--text-light);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .req-value {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  /* Inline code */
+  code {
+    background: rgba(0,0,0,0.06);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 13px;
+    direction: ltr;
+    display: inline-block;
+  }
+
+  /* Steps */
+  .substep {
+    padding: 12px 16px;
+    background: var(--bg);
+    border-radius: 8px;
+    margin: 0.75rem 0;
+    border: 0.5px solid var(--border);
+  }
+
+  .substep-title {
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+
+  /* Models table */
+  .models-list {
+    margin: 1rem 0;
+  }
+
+  .model-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: var(--bg);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    border: 0.5px solid var(--border);
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .model-name {
+    font-family: 'Consolas', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    direction: ltr;
+  }
+
+  .model-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    flex: 1;
+    margin: 0 12px;
+    text-align: center;
+  }
+
+  .model-size {
+    font-size: 12px;
+    color: var(--text-light);
+    background: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    border: 0.5px solid var(--border);
+  }
+
+  /* Chatbot */
+  .chatbot-section {
+    background: linear-gradient(135deg, var(--accent-light) 0%, #F5F2FE 100%);
+    border-radius: 16px;
+    padding: 1.75rem 1.5rem;
+    margin-bottom: 1.25rem;
+    border: 0.5px solid var(--accent-soft);
+  }
+
+  .chatbot-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1rem;
+  }
+
+  .chatbot-avatar {
+    width: 44px;
+    height: 44px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  .chatbot-title {
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .chatbot-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .chat-window {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    min-height: 200px;
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 12px;
+    border: 0.5px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .chat-msg {
+    max-width: 85%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 14px;
+    line-height: 1.6;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .chat-msg.user {
+    align-self: flex-start;
+    background: var(--accent);
+    color: white;
+    border-bottom-right-radius: 4px;
+  }
+
+  .chat-msg.bot {
+    align-self: flex-end;
+    background: var(--bg);
+    color: var(--text);
+    border-bottom-left-radius: 4px;
+  }
+
+  .chat-msg.bot strong {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .chat-msg.bot a {
+    color: var(--accent);
+    font-weight: 500;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .chat-msg.bot code {
+    background: var(--code-bg);
+    color: var(--code-text);
+    font-size: 12px;
+  }
+
+  .chat-input-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .chat-input {
+    flex: 1;
+    padding: 12px 14px;
+    border: 0.5px solid var(--border-strong);
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    background: white;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .chat-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-light);
+  }
+
+  .chat-send {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s;
+  }
+
+  .chat-send:hover {
+    background: #26215C;
+  }
+
+  .chat-send:active {
+    transform: scale(0.97);
+  }
+
+  .quick-questions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .quick-q {
+    background: white;
+    border: 0.5px solid var(--accent-soft);
+    color: var(--accent);
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+
+  .quick-q:hover {
+    background: var(--accent);
+    color: white;
+  }
+
+  .chat-disclaimer {
+    font-size: 11px;
+    color: var(--text-light);
+    text-align: center;
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+
+  /* Floating chat button */
+  .chat-fab {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 56px;
+    height: 56px;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 4px 16px rgba(60, 52, 137, 0.35);
+    z-index: 1000;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .chat-fab:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(60, 52, 137, 0.45);
+  }
+
+  .chat-fab:active {
+    transform: scale(0.95);
+  }
+
+  .chat-fab.hidden {
+    display: none;
+  }
+
+  .chat-fab-pulse {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.4;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 0.4; }
+    100% { transform: scale(1.6); opacity: 0; }
+  }
+
+  /* Floating chat window */
+  .chat-floating {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 360px;
+    max-width: calc(100vw - 40px);
+    height: 540px;
+    max-height: calc(100vh - 40px);
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: slideUp 0.3s ease;
+    border: 0.5px solid var(--border);
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .chat-floating.hidden {
+    display: none;
+  }
+
+  .chat-floating-header {
+    background: var(--accent);
+    color: white;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .chat-floating-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .chat-floating-avatar {
+    width: 32px;
+    height: 32px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .chat-floating-name {
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .chat-floating-status {
+    font-size: 11px;
+    opacity: 0.8;
+  }
+
+  .chat-floating-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+    padding: 0;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.15s;
+  }
+
+  .chat-floating-close:hover {
+    background: rgba(255,255,255,0.15);
+  }
+
+  .chat-floating-window {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: var(--bg);
+  }
+
+  .chat-floating-footer {
+    padding: 10px 12px;
+    background: white;
+    border-top: 0.5px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .chat-floating .quick-questions {
+    margin-top: 8px;
+    margin-bottom: 0;
+  }
+
+  .chat-floating .chat-disclaimer {
+    margin-top: 8px;
+    font-size: 10px;
+  }
+
+  /* Mobile adjustments for floating */
+  @media (max-width: 600px) {
+    .chat-fab {
+      bottom: 16px;
+      left: 16px;
+      width: 52px;
+      height: 52px;
+      font-size: 22px;
+    }
+
+    .chat-floating {
+      bottom: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
+      max-width: 100%;
+      height: 88vh;
+      max-height: 88vh;
+      border-radius: 16px 16px 0 0;
+    }
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    margin-top: 2rem;
+    padding: 1.5rem;
+    font-size: 13px;
+    color: var(--text-light);
+  }
+
+  .footer-tag {
+    display: inline-block;
+    background: var(--accent-light);
+    color: var(--accent);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  /* Mobile */
+  @media (max-width: 600px) {
+    .container { padding: 1rem 1rem 3rem; }
+    .hero { padding: 1.75rem 1.25rem; }
+    .hero h1 { font-size: 22px; }
+    section { padding: 1.25rem 1rem; }
+    h2 { font-size: 17px; }
+    .compare-grid { grid-template-columns: 1fr; }
+    .code { font-size: 12px; padding: 12px 12px; }
+    .model-item { flex-direction: column; align-items: flex-start; }
+    .model-desc { margin: 0; text-align: right; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Hero -->
+  <div class="hero">
+    <span class="hero-tag">טל תלמד אותי על AI</span>
+    <h1>ChatGPT אצלכם על המחשב</h1>
+    <p>מדריך מהיר להתקנת Ollama + Open WebUI, AI מקומי, פרטי וחינמי</p>
+    <div class="signature">, טל • מדריך לקהילה</div>
+  </div>
+
+  <!-- Intro -->
+  <section>
+    <h2>למה זה מעניין?</h2>
+    <p>בכל פעם שאתם משתמשים ב-ChatGPT, השיחה שלכם עוברת דרך השרתים של OpenAI. אותו דבר עם Claude, Gemini ושאר השמות. זה נוח ועובד מצוין, אבל יש דברים שלא נעים לשלוח לחברה אמריקאית: חוזים, תיקים רפואיים, מכתב מעורך הדין, רעיונות עסקיים שעדיין לא רוצים שיצאו החוצה.</p>
+    <p>הפתרון: <strong>להריץ AI על המחשב שלכם</strong>. בלי אינטרנט. בלי שאף אחד יראה. חינם.</p>
+
+    <div class="compare-grid">
+      <div class="compare-card cloud">
+        <h4>☁️ AI בענן</h4>
+        <ul>
+          <li>חזק מאוד</li>
+          <li>זמין מכל מכשיר</li>
+          <li>נתונים יוצאים מהמחשב</li>
+          <li>עולה כסף או מוגבל</li>
+        </ul>
+      </div>
+      <div class="compare-card local">
+        <h4>💻 AI מקומי</h4>
+        <ul>
+          <li>פרטי לגמרי</li>
+          <li>חינם, ללא הגבלה</li>
+          <li>עובד אופליין</li>
+          <li>דורש מחשב סביר</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stack explanation -->
+  <section>
+    <h2>שני הכלים שנתקין</h2>
+
+    <div class="substep">
+      <div class="substep-title">🦙 Ollama, המנוע</div>
+      <p class="muted">תוכנה שמורידה ומריצה מודלי AI (כמו Llama של מטא, Qwen של עליבאבא, Mistral מצרפת) על המחשב שלכם. בלי ממשק יפה, רק מנוע.</p>
+    </div>
+
+    <div class="substep">
+      <div class="substep-title">🌐 Open WebUI, הממשק</div>
+      <p class="muted">תוכנה שמתחברת ל-Ollama ונותנת לכם ממשק שנראה <em>בדיוק</em> כמו ChatGPT, עם היסטוריית שיחות, העלאת קבצים, חיפוש בהן, תיקיות, וכל הטוב.</p>
+    </div>
+
+    <div class="callout callout-info">
+      <strong>הרעיון:</strong> Ollama מריץ את ה-AI ברקע. Open WebUI נותן לכם דף אינטרנט יפה לדבר איתו.
+    </div>
+  </section>
+
+  <!-- Requirements -->
+  <section>
+    <h2>מה צריך לפני שמתחילים?</h2>
+
+    <div class="req-grid">
+      <div class="req-card">
+        <div class="req-label">RAM</div>
+        <div class="req-value">16GB+</div>
+      </div>
+      <div class="req-card">
+        <div class="req-label">דיסק פנוי</div>
+        <div class="req-value">20GB+</div>
+      </div>
+      <div class="req-card">
+        <div class="req-label">מערכת הפעלה</div>
+        <div class="req-value">Win / Mac / Linux</div>
+      </div>
+      <div class="req-card">
+        <div class="req-label">כרטיס מסך</div>
+        <div class="req-value">מומלץ NVIDIA</div>
+      </div>
+    </div>
+
+    <div class="callout callout-warn">
+      <strong>חשוב:</strong> בלי כרטיס מסך, מודלים גדולים יהיו איטיים. עם 8GB RAM זה אפשרי אבל רק למודלים קטנים. אם המחשב שלכם בן 10 שנים, אולי לא הזמן הכי טוב.
+    </div>
+  </section>
+
+  <!-- Step 1: Install Ollama -->
+  <section>
+    <h2><span class="step-num">1</span>התקנת Ollama</h2>
+
+    <p>נכנסים לאתר הרשמי ומורידים את ההתקנה למערכת שלכם:</p>
+    <p>👉 <a href="https://ollama.com/download" style="color: var(--accent);">ollama.com/download</a></p>
+
+    <h3>Windows / Mac</h3>
+    <p>מורידים את הקובץ, לוחצים פעמיים, מאשרים. זהו. אחרי ההתקנה, Ollama רץ ברקע אוטומטית.</p>
+
+    <h3>Linux</h3>
+    <div class="code"><div class="code-content">curl -fsSL https://ollama.com/install.sh | sh</div></div>
+
+    <h3>בדיקה שהכל עובד</h3>
+    <p>פותחים <code>Terminal</code> (במק) או <code>PowerShell</code> (בווינדוס) ומקלידים:</p>
+    <div class="code"><div class="code-content">ollama --version</div></div>
+    <p class="muted">אם רואים מספר גרסה, Ollama מותקן ועובד 👍</p>
+  </section>
+
+  <!-- Step 2: Download a model -->
+  <section>
+    <h2><span class="step-num">2</span>הורדת מודל ראשון</h2>
+
+    <p>עכשיו צריך להוריד מודל AI. יש המון לבחור, הנה כמה מומלצים למתחילים:</p>
+
+    <div class="models-list">
+      <div class="model-item">
+        <span class="model-name">llama3.2</span>
+        <span class="model-desc">מטא, איזון טוב למתחילים</span>
+        <span class="model-size">2GB</span>
+      </div>
+      <div class="model-item">
+        <span class="model-name">qwen2.5</span>
+        <span class="model-desc">עליבאבא, תומך עברית מצוין</span>
+        <span class="model-size">4.7GB</span>
+      </div>
+      <div class="model-item">
+        <span class="model-name">mistral</span>
+        <span class="model-desc">צרפתי, מהיר וקליל</span>
+        <span class="model-size">4.1GB</span>
+      </div>
+      <div class="model-item">
+        <span class="model-name">gemma4</span>
+        <span class="model-desc">גוגל, החדש מאפריל 2026, חזק במיוחד</span>
+        <span class="model-size">3.3GB+</span>
+      </div>
+    </div>
+
+    <p>להורדת המודל, מקלידים ב-Terminal:</p>
+    <div class="code"><div class="code-content">ollama pull llama3.2</div></div>
+
+    <p class="muted">ההורדה לוקחת כמה דקות (תלוי באינטרנט). אחרי שזה גמור, אפשר לדבר עם המודל מהטרמינל:</p>
+    <div class="code"><div class="code-content">ollama run llama3.2</div></div>
+
+    <div class="callout callout-tip">
+      <strong>טיפ:</strong> לעברית, <code>qwen2.5</code> עובד הכי טוב מבין הקטנים. <code>llama3.2</code> מבין עברית אבל עונה הרבה פעמים באנגלית.
+    </div>
+  </section>
+
+  <!-- Step 3: Install Open WebUI -->
+  <section>
+    <h2><span class="step-num">3</span>התקנת Open WebUI</h2>
+
+    <p>עכשיו הכיף, נתקין את הממשק שיחליף את הטרמינל המכוער.</p>
+
+    <h3>הדרך הכי קלה: אפליקציית Desktop</h3>
+    <p>החל מגרסה 0.9.0 (אפריל 2026), Open WebUI יצא כאפליקציית מחשב רגילה, בלי שום הגדרה מסובכת:</p>
+    <p>👉 <a href="https://openwebui.com/" style="color: var(--accent);">openwebui.com</a>, מורידים, לוחצים פעמיים, גמרנו.</p>
+
+    <h3>הדרך הקלאסית: דרך Python</h3>
+    <p>אם אתם רוצים את הגרסה שרצה בדפדפן (יותר תכונות מתקדמות):</p>
+    <div class="code"><div class="code-content">pip install open-webui<br>open-webui serve</div></div>
+    <p class="muted">אחרי שזה רץ, פותחים את הדפדפן ונכנסים ל-<code>http://localhost:8080</code></p>
+
+    <div class="callout callout-warn">
+      <strong>נדרש Python 3.11+</strong> מותקן על המחשב. בווינדוס, כדאי להתקין מ-<a href="https://python.org" style="color: inherit;">python.org</a> ולסמן "Add to PATH" בהתקנה.
+    </div>
+  </section>
+
+  <!-- Step 4: First use -->
+  <section>
+    <h2><span class="step-num">4</span>הצ'אט הראשון</h2>
+
+    <ol>
+      <li>פותחים את Open WebUI (אפליקציה או דפדפן)</li>
+      <li>נרשמים, שם משתמש וסיסמה. <strong>זה נשמר רק על המחשב שלכם.</strong></li>
+      <li>למעלה במרכז יש בורר מודלים, בוחרים את המודל שהורדתם (<code>llama3.2</code> או מה שיש לכם)</li>
+      <li>מתחילים לשאול שאלות 🎉</li>
+    </ol>
+
+    <div class="callout callout-tip">
+      <strong>נסו:</strong> לחצו על האייקון של מהדק הנייר ⌘ העלו PDF, חוזה, או מסמך, ותשאלו עליו שאלות. זה נקרא RAG וזה אחת התכונות הכי שימושיות.
+    </div>
+  </section>
+
+  <!-- What's possible -->
+  <section>
+    <h2>מה עוד אפשר לעשות?</h2>
+
+    <div class="substep">
+      <div class="substep-title">📚 בסיסי ידע</div>
+      <p class="muted">מעלים תיקייה שלמה של מסמכים, והמודל יודע לחפש בהם. אידיאלי לעו"ד עם תיקי לקוחות, או רואה חשבון עם ניירת.</p>
+    </div>
+
+    <div class="substep">
+      <div class="substep-title">🤖 יצירת בוטים מותאמים</div>
+      <p class="muted">בונים בוט עם אישיות מסוימת, גישה לקבצים מסוימים, וחוקים מסוימים. למשל בוט שעוזר לילדים שלכם בשיעורי בית.</p>
+    </div>
+
+    <div class="substep">
+      <div class="substep-title">🎙️ דיבור</div>
+      <p class="muted">מדברים למיקרופון, המודל עונה בקול. עובד גם בעברית.</p>
+    </div>
+
+    <div class="substep">
+      <div class="substep-title">🌐 חיפוש באינטרנט</div>
+      <p class="muted">אפשר לחבר חיפוש מהאינטרנט (כמו פרפלקסיטי), עדיין מקומי.</p>
+    </div>
+
+    <div class="substep">
+      <div class="substep-title">🎨 יצירת תמונות</div>
+      <p class="muted">עם תוסף נוסף (ComfyUI), אפשר לייצר תמונות מקומית, בלי DALL-E ובלי מידג'רני.</p>
+    </div>
+  </section>
+
+  <!-- Pros / Cons recap -->
+  <section>
+    <h2>שורה תחתונה</h2>
+
+    <h3>למה כן?</h3>
+    <ul>
+      <li>פרטיות מוחלטת, שום דבר לא יוצא מהמחשב</li>
+      <li>חינם, ללא מנוי, ללא הגבלות</li>
+      <li>עובד גם אופליין</li>
+      <li>אפשר להעלות מסמכים רגישים בלי דאגה</li>
+    </ul>
+
+    <h3>למה לא?</h3>
+    <ul>
+      <li>המודלים החינמיים <em>לא</em> ברמה של GPT-5 או Claude, הם טובים, אבל פחות חכמים</li>
+      <li>דורש מחשב סביר (16GB RAM לפחות)</li>
+      <li>ההתקנה דורשת קצת סבלנות בפעם הראשונה</li>
+      <li>דורש מקום בדיסק (כל מודל = כמה GB)</li>
+    </ul>
+
+    <div class="callout callout-info">
+      <strong>ההמלצה שלי:</strong> זה לא במקום ChatGPT, זה בנוסף. השתמשו ב-AI הענן לדברים מורכבים, וב-AI המקומי לכל מה שרגיש.
+    </div>
+  </section>
+
+  <!-- Chatbot (inline at bottom) -->
+  <div class="chatbot-section">
+    <div class="chatbot-header">
+      <div class="chatbot-avatar">🤖</div>
+      <div>
+        <div class="chatbot-title">העוזר החכם של המדריך</div>
+        <div class="chatbot-subtitle">שאלו אותי כל דבר על המדריך, אענה ואפנה לחלק הרלוונטי</div>
+      </div>
+    </div>
+
+    <div class="chat-window" id="chatWindow">
+      <div class="chat-msg bot">
+        שלום 👋 אני כאן לעזור עם שאלות על ההתקנה.<br>
+        <strong>אתם יכולים לשאול אותי דברים כמו:</strong>
+        <ul style="margin: 6px 0 0; padding-right: 18px; font-size: 13px;">
+          <li>"איזה מודל הכי טוב לעברית?"</li>
+          <li>"אין לי כרטיס מסך, זה יעבוד?"</li>
+          <li>"מה הפקודה להוריד מודל?"</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="chat-input-row">
+      <input
+        type="text"
+        class="chat-input"
+        id="chatInput"
+        placeholder="שאלו שאלה..."
+        autocomplete="off">
+      <button class="chat-send" onclick="sendMessage('inline')">שלח</button>
+    </div>
+
+    <div class="quick-questions">
+      <button class="quick-q" onclick="askQuick('איזה מודל הכי טוב לעברית?', 'inline')">מודל לעברית?</button>
+      <button class="quick-q" onclick="askQuick('כמה זיכרון צריך?', 'inline')">דרישות זיכרון?</button>
+      <button class="quick-q" onclick="askQuick('איך מתקינים את Ollama?', 'inline')">התקנת Ollama</button>
+      <button class="quick-q" onclick="askQuick('איך מורידים מודל?', 'inline')">הורדת מודל</button>
+      <button class="quick-q" onclick="askQuick('זה באמת חינם?', 'inline')">זה חינם?</button>
+      <button class="quick-q" onclick="askQuick('זה מחליף את ChatGPT?', 'inline')">להחליף ChatGPT?</button>
+    </div>
+
+    <div class="chat-disclaimer">
+      העוזר עובד מקומית בדפדפן שלכם, אין שליחת מידע לאף שרת. מבוסס על המידע במדריך הזה.
+    </div>
+  </div>
+
+  <!-- Floating chat button (FAB) -->
+  <button class="chat-fab" id="chatFab" onclick="toggleFloatingChat()" aria-label="פתח צ'אט">
+    <span class="chat-fab-pulse"></span>
+    <span style="position: relative; z-index: 1;">💬</span>
+  </button>
+
+  <!-- Floating chat window -->
+  <div class="chat-floating hidden" id="chatFloating">
+    <div class="chat-floating-header">
+      <div class="chat-floating-title">
+        <div class="chat-floating-avatar">🤖</div>
+        <div>
+          <div class="chat-floating-name">העוזר החכם</div>
+          <div class="chat-floating-status">מבוסס על המדריך</div>
+        </div>
+      </div>
+      <button class="chat-floating-close" onclick="toggleFloatingChat()" aria-label="סגור">×</button>
+    </div>
+
+    <div class="chat-floating-window" id="chatWindowFloat">
+      <div class="chat-msg bot">
+        שלום 👋 אני העוזר של המדריך.<br>
+        שאלו אותי כל דבר על Ollama, Open WebUI, או ההתקנה.
+      </div>
+    </div>
+
+    <div class="chat-floating-footer">
+      <div class="chat-input-row">
+        <input
+          type="text"
+          class="chat-input"
+          id="chatInputFloat"
+          placeholder="שאלו שאלה..."
+          autocomplete="off">
+        <button class="chat-send" onclick="sendMessage('float')">שלח</button>
+      </div>
+
+      <div class="quick-questions">
+        <button class="quick-q" onclick="askQuick('איזה מודל הכי טוב לעברית?', 'float')">עברית?</button>
+        <button class="quick-q" onclick="askQuick('כמה זיכרון צריך?', 'float')">RAM?</button>
+        <button class="quick-q" onclick="askQuick('זה באמת חינם?', 'float')">חינם?</button>
+        <button class="quick-q" onclick="askQuick('זה מחליף את ChatGPT?', 'float')">vs ChatGPT?</button>
+      </div>
+
+      <div class="chat-disclaimer">
+        עובד מקומית בדפדפן, אין שליחת מידע
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-tag">טל תלמד אותי על AI</div>
+    <p>שאלות? תשאלו בקבוצה 💬</p>
+    <p style="margin-top: 8px; font-size: 11px;">המדריך הזה לא מקצועי משפטית, פשוט חבר משתף 🙂</p>
+  </div>
+
+</div>
+
+<script>
+// בסיס הידע, כל "תשובה" מורכבת ממילות מפתח (בעברית ובאנגלית) ותשובה.
+// המערכת מחפשת את ההתאמה הכי טובה ומחזירה את התשובה.
+
+const knowledgeBase = [
+  {
+    keywords: ['עברית', 'דובר עברית', 'תומך עברית', 'בעברית', 'hebrew'],
+    answer: `<strong>לעברית:</strong> המודל המומלץ הוא <code>qwen2.5</code> של עליבאבא, הוא מבין ועונה בעברית הכי טוב מבין המודלים החינמיים הקטנים. <code>llama3.2</code> מבין עברית אבל הרבה פעמים עונה באנגלית.<br><br>להוריד אותו: <code>ollama pull qwen2.5</code>`
+  },
+  {
+    keywords: ['זיכרון', 'ram', 'דרישות', 'מחשב חזק', 'איזה מחשב', 'requirements', 'דרוש'],
+    answer: `<strong>דרישות מינימום:</strong><br>• <strong>RAM:</strong> 16GB (אפשר עם 8GB אבל רק למודלים קטנים)<br>• <strong>דיסק פנוי:</strong> לפחות 20GB (כל מודל = 2-7 GB)<br>• <strong>כרטיס מסך:</strong> לא חובה, אבל מומלץ NVIDIA<br>• <strong>מערכת הפעלה:</strong> Windows, Mac או Linux<br><br>בלי כרטיס מסך זה יעבוד אבל יותר לאט. אם המחשב שלכם בן 10 שנים, אולי לא הזמן הכי טוב.`
+  },
+  {
+    keywords: ['כרטיס מסך', 'gpu', 'graphics', 'nvidia', 'אין לי כרטיס'],
+    answer: `<strong>כרטיס מסך לא חובה</strong>, זה יעבוד גם בלעדיו, רק יותר לאט.<br><br>אם יש לכם כרטיס NVIDIA, מצוין, התשובות יהיו מהירות מאוד. AMD ואינטל גם עובדים אבל פחות יעילים. ב-Mac עם שבב M1/M2/M3, זה עובד מצוין מהקופסה.<br><br>למודלים קטנים (2-4GB) גם CPU רגיל מספיק.`
+  },
+  {
+    keywords: ['התקן', 'התקנה', 'איך מתקינים', 'להתקין', 'install', 'אולמה', 'ollama'],
+    answer: `<strong>התקנת Ollama:</strong><br>1. נכנסים ל-<a onclick="window.open('https://ollama.com/download')">ollama.com/download</a><br>2. מורידים את הקובץ למערכת שלכם (Windows/Mac/Linux)<br>3. לוחצים פעמיים, מאשרים<br>4. זהו, Ollama רץ ברקע אוטומטית<br><br>בדיקה: פותחים Terminal/PowerShell ומקלידים <code>ollama --version</code>`
+  },
+  {
+    keywords: ['מוריד מודל', 'הורדת מודל', 'איך מורידים', 'pull', 'מודל ראשון'],
+    answer: `<strong>להוריד מודל:</strong> פותחים Terminal ומקלידים:<br><br><code>ollama pull llama3.2</code><br><br>אפשר להחליף את <code>llama3.2</code> בכל מודל אחר, למשל <code>qwen2.5</code> (לעברית) או <code>mistral</code>.<br><br>ההורדה לוקחת 2-10 דקות תלוי באינטרנט.`
+  },
+  {
+    keywords: ['מודל', 'איזה מודל', 'מודלים', 'מומלץ', 'הכי טוב'],
+    answer: `<strong>מודלים מומלצים למתחילים:</strong><br>• <code>llama3.2</code>, מטא, 2GB, איזון טוב למתחילים<br>• <code>qwen2.5</code>, עליבאבא, 4.7GB, <strong>הכי טוב לעברית</strong><br>• <code>mistral</code>, צרפתי, 4.1GB, מהיר<br>• <code>gemma4</code>, גוגל, החדש מאפריל 2026, מבוסס על מחקר Gemini 3<br><br>למתחילים אני ממליץ להתחיל עם <code>qwen2.5</code> אם רוצים עברית, <code>gemma4</code> אם רוצים את החדש והחזק, או <code>llama3.2</code> אם רוצים מודל קטן ומהיר.`
+  },
+  {
+    keywords: ['open webui', 'openwebui', 'ממשק', 'אינטרפייס', 'web ui'],
+    answer: `<strong>Open WebUI</strong> זה הממשק היפה שמתחבר ל-Ollama. שתי דרכים להתקין:<br><br><strong>1. אפליקציית Desktop (הכי קל):</strong><br>נכנסים ל-<a onclick="window.open('https://openwebui.com/')">openwebui.com</a>, מורידים, לוחצים פעמיים. גמרנו.<br><br><strong>2. דרך Python:</strong><br><code>pip install open-webui</code><br><code>open-webui serve</code><br>אחר כך נכנסים ל-<code>http://localhost:8080</code>`
+  },
+  {
+    keywords: ['חינם', 'עולה', 'כסף', 'מחיר', 'free', 'cost'],
+    answer: `<strong>כן, זה חינם לגמרי!</strong> 🎉<br><br>גם Ollama וגם Open WebUI הם תוכנות חופשיות וקוד פתוח. גם המודלים (Llama, Qwen, Mistral וכו') חינמיים.<br><br>אין מנוי, אין הגבלת הודעות, אין "Pro version". העלות היחידה היא החשמל למחשב שלכם 😉`
+  },
+  {
+    keywords: ['פרטיות', 'מידע', 'נשמר', 'נתונים', 'מאובטח', 'privacy'],
+    answer: `<strong>פרטיות מוחלטת</strong> 🔒<br><br>כל השיחות, הקבצים, וההיסטוריה נשמרים <strong>רק על המחשב שלכם</strong>. שום דבר לא נשלח לאף שרת חיצוני.<br><br>זה הופך את זה למצוין למסמכים רגישים: חוזים, תיקים רפואיים, מכתבים מהבנק, רעיונות עסקיים. גם בלי אינטרנט הכל ימשיך לעבוד.`
+  },
+  {
+    keywords: ['chatgpt', 'מחליף', 'במקום', 'claude', 'gpt', 'gemini', 'ענן'],
+    answer: `<strong>זה לא מחליף את ChatGPT, זה משלים אותו.</strong><br><br>הסיבה: המודלים החינמיים שרצים על המחשב שלכם <strong>פחות חזקים</strong> מ-GPT-5 או Claude. הם טובים מאוד, אבל לא הכי חכמים בעולם.<br><br><strong>ההמלצה שלי:</strong><br>• ChatGPT/Claude, לדברים מורכבים שדורשים את המודל הכי חזק<br>• Ollama מקומי, לכל מה שרגיש או פרטי`
+  },
+  {
+    keywords: ['קבצים', 'מסמכים', 'pdf', 'rag', 'בסיס ידע', 'להעלות'],
+    answer: `<strong>אפשר להעלות מסמכים!</strong> 📄<br><br>ב-Open WebUI יש אייקון של מהדק נייר 📎 בצ'אט. לוחצים, מעלים PDF/Word/טקסט, והמודל יכול לענות על שאלות מהמסמך.<br><br>זה נקרא <strong>RAG</strong> וזו אחת התכונות הכי שימושיות. אידיאלי לחוזים, מסמכים משפטיים, ספרי עזר, וכו'.<br><br>אפשר גם ליצור "בסיס ידע" קבוע מתיקייה שלמה.`
+  },
+  {
+    keywords: ['python', 'פייתון', 'pip'],
+    answer: `<strong>Python דרוש רק ל-Open WebUI דרך הדפדפן.</strong><br><br>אם אתם משתמשים באפליקציית Desktop של Open WebUI, <strong>לא צריך Python כלל</strong>.<br><br>אם בכל זאת רוצים את גרסת הדפדפן:<br>1. מתקינים Python 3.11 ומעלה מ-<a onclick="window.open('https://python.org')">python.org</a><br>2. בווינדוס, <strong>חשוב לסמן "Add to PATH"</strong> בהתקנה<br>3. אחר כך: <code>pip install open-webui</code>`
+  },
+  {
+    keywords: ['terminal', 'טרמינל', 'cmd', 'powershell', 'שורת פקודה'],
+    answer: `<strong>איך פותחים Terminal:</strong><br><br>• <strong>Windows:</strong> מקש Windows + R, מקלידים <code>powershell</code>, Enter<br>• <strong>Mac:</strong> Cmd + Space, מקלידים <code>terminal</code>, Enter<br>• <strong>Linux:</strong> בדרך כלל Ctrl + Alt + T<br><br>זה החלון השחור עם טקסט שאיתו מדברים עם Ollama.`
+  },
+  {
+    keywords: ['איטי', 'לאט', 'איך מאיצים', 'speed', 'slow'],
+    answer: `<strong>אם זה איטי:</strong><br>1. נסו מודל קטן יותר, <code>llama3.2</code> במקום מודל של 7B+<br>2. סגרו תוכנות אחרות שצורכות RAM<br>3. אם יש לכם NVIDIA, ודאו שהדרייברים מעודכנים<br>4. במקרה הכי קיצוני, תוסיפו RAM למחשב<br><br>למחשב חלש, מודל של 2-3GB יהיה הרבה יותר נסבל ממודל של 7GB.`
+  },
+  {
+    keywords: ['תמונות', 'imagegen', 'comfyui', 'dalle', 'midjourney', 'יצירת תמונה'],
+    answer: `<strong>יצירת תמונות מקומית</strong> אפשרית עם תוסף נוסף בשם <strong>ComfyUI</strong> או <strong>Automatic1111</strong> שמתחברים ל-Open WebUI.<br><br>זה נושא מתקדם יותר, מומלץ קודם להרגיש בנוח עם הצ'אט הרגיל, ואז להוסיף יצירת תמונות בנפרד.<br><br>אגב, זה דורש כרטיס מסך טוב יותר מאשר רק צ'אט.`
+  },
+  {
+    keywords: ['קול', 'דיבור', 'מיקרופון', 'voice', 'speech', 'tts'],
+    answer: `<strong>Open WebUI תומך בדיבור!</strong> 🎙️<br><br>בהגדרות יש אפשרות להפעיל:<br>• <strong>STT</strong>, דיבור לטקסט (Whisper של OpenAI עובד מקומית)<br>• <strong>TTS</strong>, טקסט לדיבור<br><br>אחר כך יופיע אייקון של מיקרופון בצ'אט. זה עובד גם בעברית, אם כי לא מושלם.`
+  },
+  {
+    keywords: ['linux', 'לינוקס', 'ubuntu'],
+    answer: `<strong>Linux:</strong> ההתקנה הכי פשוטה.<br><br><code>curl -fsSL https://ollama.com/install.sh | sh</code><br><br>אחר כך:<br><code>ollama pull llama3.2</code><br><code>ollama run llama3.2</code><br><br>ל-Open WebUI הכי קל דרך Docker או pip, שניהם עובדים מצוין על Linux.`
+  },
+  {
+    keywords: ['mac', 'מק', 'apple', 'macbook'],
+    answer: `<strong>Mac:</strong> זו אחת הסביבות הכי טובות ל-Ollama.<br><br>אם יש לכם שבב M1/M2/M3/M4, זה <strong>מהיר מאוד</strong> בלי צורך בכרטיס מסך נפרד. שבבי Apple Silicon מותאמים יפה למודלי שפה.<br><br>פשוט מורידים מ-<a onclick="window.open('https://ollama.com/download')">ollama.com/download</a> ולוחצים פעמיים על הקובץ.`
+  },
+  {
+    keywords: ['windows', 'ווינדוס', 'win'],
+    answer: `<strong>Windows:</strong><br>1. מורידים מ-<a onclick="window.open('https://ollama.com/download')">ollama.com/download</a><br>2. מריצים את הקובץ <code>OllamaSetup.exe</code><br>3. מאשרים, מחכים<br>4. Ollama רץ ברקע (תראו אייקון ליד השעון)<br><br>אחר כך פותחים PowerShell ומקלידים <code>ollama pull llama3.2</code> להוריד מודל.`
+  }
+];
+
+// תשובת ברירת מחדל
+const fallbackAnswer = `סליחה, לא בטוח שהבנתי את השאלה 🤔<br><br>נסו לשאול על:<br>• <strong>התקנה</strong> של Ollama או Open WebUI<br>• <strong>מודלים</strong> מומלצים (במיוחד לעברית)<br>• <strong>דרישות מערכת</strong> ו-RAM<br>• <strong>פרטיות</strong> ואבטחה<br>• <strong>השוואה</strong> ל-ChatGPT<br><br>או לחצו על אחת השאלות המהירות למטה 👇`;
+
+// מילים נפוצות שצריך להתעלם מהן
+const stopWords = ['של', 'את', 'על', 'אם', 'גם', 'זה', 'יש', 'מה', 'איך', 'כמה', 'למה', 'אפשר', 'צריך', 'ואת', 'או', 'אבל', 'יותר', 'הוא', 'היא'];
+
+function findBestAnswer(query) {
+  const q = query.toLowerCase().trim();
+  if (!q) return fallbackAnswer;
+
+  // ניקוד לכל פריט בבסיס הידע
+  const scored = knowledgeBase.map(item => {
+    let score = 0;
+    item.keywords.forEach(kw => {
+      const kwLower = kw.toLowerCase();
+      if (q.includes(kwLower)) {
+        // מילה מלאה = ניקוד גבוה
+        score += kwLower.length;
+      }
+    });
+    return { item, score };
+  });
+
+  // מיון לפי ניקוד
+  scored.sort((a, b) => b.score - a.score);
+
+  // אם אף תוצאה לא מעל סף, fallback
+  if (scored[0].score < 2) {
+    return fallbackAnswer;
+  }
+
+  return scored[0].item.answer;
+}
+
+function addMessage(text, sender, target) {
+  // target = 'inline' או 'float'
+  const windowId = target === 'float' ? 'chatWindowFloat' : 'chatWindow';
+  const window = document.getElementById(windowId);
+  const msg = document.createElement('div');
+  msg.className = 'chat-msg ' + sender;
+  msg.innerHTML = text;
+  window.appendChild(msg);
+  window.scrollTop = window.scrollHeight;
+}
+
+function sendMessage(target) {
+  target = target || 'inline';
+  const inputId = target === 'float' ? 'chatInputFloat' : 'chatInput';
+  const input = document.getElementById(inputId);
+  const query = input.value.trim();
+  if (!query) return;
+
+  addMessage(escapeHtml(query), 'user', target);
+  input.value = '';
+
+  // השהיה קצרה כדי שזה ירגיש טבעי
+  setTimeout(() => {
+    const answer = findBestAnswer(query);
+    addMessage(answer, 'bot', target);
+  }, 350);
+}
+
+function askQuick(question, target) {
+  target = target || 'inline';
+  const inputId = target === 'float' ? 'chatInputFloat' : 'chatInput';
+  document.getElementById(inputId).value = question;
+  sendMessage(target);
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// פתיחה וסגירה של החלון הצף
+function toggleFloatingChat() {
+  const fab = document.getElementById('chatFab');
+  const floating = document.getElementById('chatFloating');
+
+  if (floating.classList.contains('hidden')) {
+    floating.classList.remove('hidden');
+    fab.classList.add('hidden');
+    // מיקוד אוטומטי בשדה הקלט
+    setTimeout(() => document.getElementById('chatInputFloat').focus(), 300);
+  } else {
+    floating.classList.add('hidden');
+    fab.classList.remove('hidden');
+  }
+}
+
+// שליחה עם Enter בשני שדות הקלט
+document.getElementById('chatInput').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') sendMessage('inline');
+});
+
+document.getElementById('chatInputFloat').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') sendMessage('float');
+});
+
+// סגירה עם ESC
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    const floating = document.getElementById('chatFloating');
+    if (!floating.classList.contains('hidden')) {
+      toggleFloatingChat();
+    }
+  }
+});
+</script>
+
+</body>
+</html>
